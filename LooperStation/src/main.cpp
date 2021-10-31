@@ -11,6 +11,7 @@ Bounce buttonStartRecPlay = Bounce(36, 8);
 Bounce buttonPlay2Ch = Bounce(35, 8);
 
 loopStation station;
+void updateButton();
 
 void setup() {
   Serial.println("Hello");
@@ -56,3 +57,4 @@ void updateButton() {
     Serial.println("PlayCH2 Button Press");
     station.playChannel(1);
   }
+}

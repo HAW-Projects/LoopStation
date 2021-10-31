@@ -17,6 +17,13 @@ AudioConnection patchCord5(mixer1, 0, i2s1, 1);
 AudioConnection patchCord6(mixer1, 0, i2s1, 0); // xy=265,212
 
 AudioControlSGTL5000 sgtl5000_1;
+
+FsFile playFiles[4];
+FsFile recordFile;
+
+String playFilenames[4];
+String recordFilename;
+
 const int myInput = AUDIO_INPUT_LINEIN;
 
 void loopStation::init() {
@@ -84,4 +91,12 @@ void loopStation::serviceRoutine() {
 
   // continous play record
   // handle buffer
+}
+
+void updateFilename() {
+  static int counter = 0;
+
+  recordFilename = String(counter + ".RAW");
+
+  counter++;
 }

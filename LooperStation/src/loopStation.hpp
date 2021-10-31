@@ -12,11 +12,7 @@ typedef enum playState { START, STOP };
 
 #define SD_CS 10
 
-FsFile playFiles[4];
-FsFile recordFile;
-
-String playFilenames[4];
-String recordFilename;
+void updateFilename();
 
 class loopStation {
 public:
@@ -34,11 +30,3 @@ public:
 
   // buffer
 };
-
-void updateFilename() {
-  static int counter = 0;
-
-  recordFilename = String(counter + ".RAW");
-
-  counter++;
-}
