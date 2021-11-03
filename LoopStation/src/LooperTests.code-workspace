@@ -1,0 +1,41 @@
+{
+	"folders": [
+		{
+			"name": "DirectINtoOUT",
+			"path": "../../DirectINtoOUT"
+		},
+		{
+			"name": "LoopStation",
+			"path": ".."
+		},
+		{
+			"name": "SaveRec",
+			"path": "../../SaveRec"
+		},
+		{
+			"name": "RecTest2",
+			"path": "../../RecTest2"
+		},
+		{
+			"name": "GarbageTest",
+			"path": "../../GarbageTest"
+		},
+		{
+			"name": "RecPlayTest3",
+			"path": "../../RecPlayTest3"
+		},
+		{
+			"name": "SdFatTest",
+			"path": "../../SdFatTest"
+		},
+		{
+			"name": "SdFatTestV1",
+			"path": "../../SdFatTestV1"
+		},
+		{
+			"name": "SdFatGarbage",
+			"path": "../../SdFatGarbage"
+		}
+	],
+	"settings": {}
+}

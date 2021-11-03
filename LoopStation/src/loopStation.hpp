@@ -1,5 +1,6 @@
 
 #include "Audio.h"
+#include "play_sd_buffer.h"
 #include <Arduino.h>
 #include <Bounce.h>
 #include <SD.h>
@@ -7,8 +8,10 @@
 #include <SerialFlash.h>
 #include <Wire.h>
 
-typedef enum recordState { RECORDING, FREE };
-typedef enum playState { START, STOP };
+enum recordState { RECORDING, FREE };
+enum playState { START, STOP };
+
+#define BUFFERSIZE 512
 
 #define SD_CS 10
 
@@ -28,5 +31,17 @@ public:
   // int channelRecordState[4];
   recordState recState = FREE;
 
+  uint32_t file_size;
+  volatile uint32_t file_offset;
+
+  String playFilenames[4];
+  FsFile playFiles[4];
+  FsFile recordFile;
+
   // buffer
+  byte readBuffer[4][2][BUFFERSIZE]; // play Buffer 4x Buffersize
+  byte playBufferIndex[4];
+
+  uint32_t file_size[4];
+  volatile uint32_t file_offset[4];
 };

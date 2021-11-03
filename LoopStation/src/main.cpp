@@ -14,6 +14,9 @@ loopStation station;
 void updateButton();
 
 void setup() {
+
+Serial.begin(9600);
+  while (!Serial);
   Serial.println("Hello");
 
   pinMode(37, INPUT_PULLUP);
