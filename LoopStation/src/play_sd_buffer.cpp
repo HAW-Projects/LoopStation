@@ -89,6 +89,8 @@ void AudioPlayBuff::update(void) {
   release(block);
 }
 
+void AudioPlayBuff::setFileSize(uint32_t fileSize) { file_size = fileSize; }
+
 #define B2M                                                                    \
   (uint32_t)((double)4294967296000.0 / AUDIO_SAMPLE_RATE_EXACT /               \
              2.0) // 97352592

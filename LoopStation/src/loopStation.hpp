@@ -31,9 +31,6 @@ public:
   // int channelRecordState[4];
   recordState recState = FREE;
 
-  uint32_t file_size;
-  volatile uint32_t file_offset;
-
   String playFilenames[4];
   FsFile playFiles[4];
   FsFile recordFile;
