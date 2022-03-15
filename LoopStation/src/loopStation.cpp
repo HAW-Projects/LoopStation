@@ -22,18 +22,25 @@ const int myInput = AUDIO_INPUT_LINEIN;
 String recordFilename;
 
 void loopStation::init() {
-  AudioMemory(60);
+  AudioMemory(180);
   sgtl5000_1.enable();
   sgtl5000_1.inputSelect(myInput);
-  sgtl5000_1.volume(0.5);
+  sgtl5000_1.volume(1);
 
-  mixer1.gain(0, 0.5);
-  mixer1.gain(1, 0.5);
-  mixer1.gain(2, 0.5);
-  mixer1.gain(3, 0.5);
+  mixer1.gain(0, 1);
+  mixer1.gain(1, 1);
+  mixer1.gain(2, 1);
+  mixer1.gain(3, 1);
 
   if (!SD.sdfs.begin(SdSpiConfig(SD_CS, SHARED_SPI, SD_SCK_MHZ(24))))
     Serial.println("sdinitialization failed!");
+
+  for (size_t i = 0; i < 4; i++) {
+    playRaw[i].setBufferPointer(readBuffer[i][0], readBuffer[i][1]);
+
+    playRaw[i].setBufferSize(BUFFERSIZE, 0);
+    playRaw[i].setBufferSize(BUFFERSIZE, 1);
+  }
 
   // init SD, open all files
   // set mixer Gain
@@ -44,6 +51,7 @@ void loopStation::playChannel(int id) {
   Serial.println(playFilenames[id]);
 
   playFiles[id].close();
+
   playFiles[id] = SD.sdfs.open(playFilenames[id], O_READ | O_CREAT);
 
   if (!playFiles[id].isOpen())
@@ -65,8 +73,6 @@ void loopStation::playChannel(int id) {
 
 void loopStation::stopChannel(int id) {
 
-  // playFiles[id].close();
-
   playRaw[id].stop();
 
   channelPlayState[id] = STOP;
@@ -80,9 +86,12 @@ void loopStation::recordChannel() {
 
   updateFilename();
 
+  SD.sdfs.remove(recordFilename);
+
   recordFile = SD.sdfs.open(recordFilename, O_WRITE | O_CREAT);
 
   queue1.begin();
+
   recState = RECORDING;
 }
 
@@ -101,7 +110,7 @@ void loopStation::recordChannelStop(int id) {
   recordFile.close();
   recState = FREE;
 
-  // playFilenames= recordFilename;
+  playFilenames[id] = recordFilename;
   playChannel(id);
 }
 
@@ -109,37 +118,33 @@ void loopStation::serviceRoutine() {
 
   //*****************************************
   // Continue Recording
-  if (queue1.available() >= 2) {
-    byte buffer[512];
-    memcpy(buffer, queue1.readBuffer(), 256);
+  if (queue1.available() >= 1) {
+
+    uint16_t ret = recordFile.write(queue1.readBuffer(), 256);
     queue1.freeBuffer();
-    memcpy(buffer + 256, queue1.readBuffer(), 256);
-    queue1.freeBuffer();
-    recordFile.write(buffer, 512);
+
+    if (ret != 256) {
+      Serial.println("written size to SD wrong");
+    }
   }
   //*****************************************
   // Continue Playing
   for (int i = 0; i < 4; i++) {
-    uint16_t n;
+    uint16_t n = BUFFERSIZE;
     if (channelPlayState[i] == START) { // end of file??
       if (playRaw[i].getBufferState() == 1) {
 
-        Serial.println("Buffer switch");
-
-        // switch buffer pointer
-        playRaw[i].setBuffer(readBuffer[i][playBufferIndex[i]], BUFFERSIZE);
-
-        // switch index
-        playBufferIndex[i] = !playBufferIndex[i];
-
         // read new buffer from sd
-        n = playFiles[i].read(readBuffer[i][playBufferIndex[i]], BUFFERSIZE);
+        n = playFiles[i].read(readBuffer[i][!playRaw[i].activeBufferID],
+                              BUFFERSIZE);
+
+        playRaw[i].bufferState = 0;
       }
     }
 
     if (n != BUFFERSIZE) { // end of file??
+      Serial.println("EndOfFileReached");
       stopChannel(i);
-      channelPlayState[i] = STOP;
     }
   }
 }
@@ -147,7 +152,7 @@ void loopStation::serviceRoutine() {
 void updateFilename() {
   static int counter = 0;
 
-  recordFilename = String(counter + ".RAW");
+  recordFilename = String(String(counter) + ".RAW");
 
   Serial.print("newRecordFilename:  ");
   Serial.println(recordFilename);

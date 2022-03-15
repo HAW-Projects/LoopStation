@@ -32,6 +32,9 @@
 #include "AudioStream.h"
 #include "SdFat.h"
 #include "sdios.h"
+
+#include <functional>
+
 class AudioPlayBuff : public AudioStream {
 public:
   AudioPlayBuff(void) : AudioStream(0, NULL) { begin(); }
@@ -40,25 +43,30 @@ public:
   void stop(void);
   bool isPlaying(void) { return playing; }
 
-  void setBuffer(byte *buffer, uint16_t bufferSize);
   bool getBufferState() { return bufferState; }
+
+  void setBufferPointer(byte *buffer0, byte *buffer1);
+  void setBufferSize(uint16_t bufferSize, byte bufferID);
 
   void setFileSize(uint32_t fileSize);
 
   uint32_t positionMillis(void);
   uint32_t lengthMillis(void);
   virtual void update(void);
+  byte bufferState;
+  std::function<void()> readBufferFunction = nullptr;
 
+  byte activeBufferID = 0;
 private:
   SdFat sd;
   uint32_t file_size;
   volatile uint32_t file_offset;
   volatile uint32_t buffer_offset;
-  volatile uint32_t bufferSize;
+  volatile uint32_t bufferSize[2];
+
 
   volatile bool playing;
-  byte *buffer;
-  byte bufferState;
+  byte *buffer[2];
 };
 
 #endif

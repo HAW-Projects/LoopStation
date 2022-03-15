@@ -15,8 +15,9 @@ void updateButton();
 
 void setup() {
 
-Serial.begin(9600);
-  while (!Serial);
+  Serial.begin(9600);
+  while (!Serial)
+    ;
   Serial.println("Hello");
 
   pinMode(37, INPUT_PULLUP);
@@ -53,7 +54,7 @@ void updateButton() {
   }
   if (buttonPlay.fallingEdge()) {
     Serial.println("Play Button Press");
-    station.playChannel(0);
+    station.recordChannelStop(1);
   }
 
   if (buttonPlay2Ch.fallingEdge()) {

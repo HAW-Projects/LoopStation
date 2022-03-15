@@ -11,7 +11,7 @@
 enum recordState { RECORDING, FREE };
 enum playState { START, STOP };
 
-#define BUFFERSIZE 512
+#define BUFFERSIZE 10240
 
 #define SD_CS 10
 
@@ -25,6 +25,8 @@ public:
   void recordChannelStop(int id);
   void stopChannel(int id);
 
+  void readBufferFromSD(int id);
+
   void serviceRoutine();
 
   playState channelPlayState[4] = {STOP, STOP, STOP, STOP};
@@ -37,7 +39,7 @@ public:
 
   // buffer
   byte readBuffer[4][2][BUFFERSIZE]; // play Buffer 4x Buffersize
-  byte playBufferIndex[4];
+  // byte playBufferIndex[4];
 
   uint32_t file_size[4];
   volatile uint32_t file_offset[4];

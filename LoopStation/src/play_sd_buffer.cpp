@@ -33,7 +33,7 @@ void AudioPlayBuff::begin(void) { playing = false; }
 
 bool AudioPlayBuff::play(void) {
 
-  AudioStartUsingSPI();
+  // AudioStartUsingSPI();
   file_offset = 0;
   playing = true;
   buffer_offset = 0;
@@ -46,11 +46,18 @@ void AudioPlayBuff::stop(void) {
   // AudioStopUsingSPI();
 }
 
-void AudioPlayBuff::setBuffer(byte *buffer, uint16_t bufferSize) {
-  this->buffer = buffer;
-  this->bufferSize = bufferSize;
-  buffer_offset = 0;
-  bufferState = 0;
+void AudioPlayBuff::setBufferPointer(byte *buffer0, byte *buffer1) {
+  this->buffer[0] = buffer0;
+  this->buffer[1] = buffer1;
+
+  Serial.println("register pointer to buffer");
+}
+
+void AudioPlayBuff::setBufferSize(uint16_t bufferSize, byte bufferID) {
+
+  this->bufferSize[bufferID] = bufferSize;
+  // buffer_offset = 0;
+  // bufferState = 0;
 }
 
 void AudioPlayBuff::update(void) {
@@ -66,26 +73,29 @@ void AudioPlayBuff::update(void) {
   if (block == NULL)
     return;
 
-  if (!bufferState) {
-    // we can read more data from the file...
-    // n = rawfile.read(block->data, AUDIO_BLOCK_SAMPLES * 2);
-    memcpy(block->data, (buffer + buffer_offset), AUDIO_BLOCK_SAMPLES * 2);
+  // if (!bufferState) {
+  // we can read more data from the file...
+  // n = rawfile.read(block->data, AUDIO_BLOCK_SAMPLES * 2);
+  memcpy(block->data, (buffer[activeBufferID] + buffer_offset),
+         AUDIO_BLOCK_SAMPLES * 2);
 
-    n = AUDIO_BLOCK_SAMPLES * 2;
+  n = AUDIO_BLOCK_SAMPLES * 2;
 
-    buffer_offset += n;
-    file_offset += n;
+  buffer_offset += n;
+  file_offset += n;
 
-    for (i = n / 2; i < AUDIO_BLOCK_SAMPLES; i++) {
-      block->data[i] = 0;
-    }
-
-    transmit(block);
-
-    if (buffer_offset == bufferSize) {
-      bufferState = 1;
-    }
+  for (i = n / 2; i < AUDIO_BLOCK_SAMPLES; i++) {
+    block->data[i] = 0;
   }
+
+  transmit(block);
+
+  if (buffer_offset == bufferSize[activeBufferID]) {
+    bufferState = 1;
+    buffer_offset = 0;
+    activeBufferID = !activeBufferID;
+  }
+  // }
   release(block);
 }
 
